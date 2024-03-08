@@ -58,11 +58,8 @@ func (t *Ticket) Exit() error {
 	now := time.Now().UTC()
 	t.exitTime = &now
 	duration := time.Since(t.entryTime)
-	fmt.Println(duration)
 	hours := int(math.Ceil(duration.Hours()))
-	fmt.Println(hours)
 	totalFee := hours * FEE_PER_HOUR
-	fmt.Println(totalFee)
 	t.fee = &totalFee
 	return nil
 }

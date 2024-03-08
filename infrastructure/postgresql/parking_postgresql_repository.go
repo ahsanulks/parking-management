@@ -3,7 +3,6 @@ package postgresql
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"supertaltest/internal/parking/domain"
 	"time"
 
@@ -91,7 +90,6 @@ func (repo *ParkingPostgresqlRepository) ParkVehicle(
 	}
 
 	_, err = execAndCheckTx(tx, "INSERT INTO tickets (code, parking_lot_id, parking_slot_id, entry_time) VALUES ($1, $2, $3, $4)", ticket.Code(), ticket.LotId(), ticket.SlotID(), ticket.EntiryTime())
-	fmt.Println(ticket.EntiryTime())
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +147,7 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 
 	ticket = &domain.Ticket{}
 	unmarshallTicket(&ticketModel, ticket)
-	fmt.Println(ticket.EntiryTime())
+
 	ticket, err = updateFunc(ticket, parkingLot)
 	if err != nil {
 		return nil, err
