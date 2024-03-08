@@ -48,7 +48,7 @@ func (t *Ticket) UnmarshallFromDatabase(
 }
 
 func (t *Ticket) generateCode() {
-	t.code = fmt.Sprintf("%d-%d-%d", t.lotID, t.slotID, t.entryTime.Unix())
+	t.code = fmt.Sprintf("%05d-%05d-%d", t.lotID, t.slotID, t.entryTime.Unix())
 }
 
 func (t *Ticket) Exit() error {

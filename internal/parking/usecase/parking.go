@@ -5,17 +5,17 @@ import (
 	"supertaltest/internal/parking/domain"
 )
 
-type GuestParkerUsecase struct {
+type GuestParkingUsecase struct {
 	parkRepository domain.Repository
 }
 
-func NewGuestParkerUsecase(repo domain.Repository) *GuestParkerUsecase {
-	return &GuestParkerUsecase{
+func NewGuestParkerUsecase(repo domain.Repository) *GuestParkingUsecase {
+	return &GuestParkingUsecase{
 		parkRepository: repo,
 	}
 }
 
-func (parker *GuestParkerUsecase) ParkUserVehicle(ctx context.Context, lotId int) (ticketId string, err error) {
+func (parker *GuestParkingUsecase) ParkUserVehicle(ctx context.Context, lotId int) (ticketId string, err error) {
 	ticket, err := parker.parkRepository.ParkVehicle(
 		ctx,
 		lotId,
@@ -28,7 +28,7 @@ func (parker *GuestParkerUsecase) ParkUserVehicle(ctx context.Context, lotId int
 	return ticket.Code(), err
 }
 
-func (parker *GuestParkerUsecase) ExitUserPark(ctx context.Context, ticketCode string) (*domain.Ticket, error) {
+func (parker *GuestParkingUsecase) ExitUserPark(ctx context.Context, ticketCode string) (*domain.Ticket, error) {
 	return parker.parkRepository.ExitParking(
 		ctx,
 		ticketCode,
