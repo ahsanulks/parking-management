@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"supertaltest/internal/parking/domain"
+	"time"
 )
 
 type ParkingManagerUsecase struct {
@@ -33,4 +34,10 @@ func (pu *ParkingManagerUsecase) GetLotStatus(ctx context.Context, lotId int) (*
 
 func (pu *ParkingManagerUsecase) ToggleParkingSlotToMaintenance(ctx context.Context, parkingManager *domain.ParkingManager, slotId int) error {
 	return pu.parkingRepo.ToggleParkingSlotMaintenance(ctx, parkingManager.Id(), slotId)
+}
+
+func (pu *ParkingManagerUsecase) GetParkingSummary(ctx context.Context, startDate, endDate time.Time) (*domain.ParkingSummary, error) {
+	startDate = startDate.UTC().Truncate(24 * time.Hour)
+	endDate = endDate.UTC().Truncate(24 * time.Hour)
+	return pu.parkingRepo.GetParkingSummary(ctx, startDate, endDate)
 }

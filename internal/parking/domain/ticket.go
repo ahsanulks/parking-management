@@ -19,6 +19,7 @@ type Ticket struct {
 	entryTime time.Time
 	exitTime  *time.Time
 	fee       *int
+	hours     *int
 }
 
 func NewTicket(lotID, slotID int) *Ticket {
@@ -37,6 +38,7 @@ func (t *Ticket) UnmarshallFromDatabase(
 	entryTime time.Time,
 	exitTime *time.Time,
 	fee *int,
+	hours *int,
 ) {
 	t.id = id
 	t.lotID = lotID
@@ -45,6 +47,7 @@ func (t *Ticket) UnmarshallFromDatabase(
 	t.entryTime = entryTime.UTC()
 	t.exitTime = exitTime
 	t.fee = fee
+	t.hours = hours
 }
 
 func (t *Ticket) generateCode() {
@@ -61,6 +64,7 @@ func (t *Ticket) Exit() error {
 	hours := int(math.Ceil(duration.Hours()))
 	totalFee := hours * FEE_PER_HOUR
 	t.fee = &totalFee
+	t.hours = &hours
 	return nil
 }
 
@@ -86,4 +90,8 @@ func (t Ticket) Fee() *int {
 
 func (t Ticket) ExitTime() *time.Time {
 	return t.exitTime
+}
+
+func (t Ticket) Hours() *int {
+	return t.hours
 }

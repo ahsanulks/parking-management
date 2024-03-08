@@ -45,6 +45,7 @@ type TicketModel struct {
 	EntryTime     time.Time  `db:"entry_time"`
 	ExitTime      *time.Time `db:"exit_time"`
 	Fee           *int       `db:"fee"`
+	Hours         *int       `db:"hours"`
 }
 
 func (repo *ParkingPostgresqlRepository) ParkVehicle(
@@ -126,7 +127,7 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 		SELECT
 			pl.id AS parking_lot_id, pl.name AS parking_lot_name, pl.capacity, pl.slot_left,
 			ps.id AS parking_slot_id, ps.number, ps.available, ps.in_maintenance,
-			t.id AS ticket_id, t.code, t.entry_time, t.exit_time, t.fee
+			t.id AS ticket_id, t.code, t.entry_time, t.exit_time, t.fee, t.hours
 		FROM tickets t
 		INNER JOIN parking_slots ps ON t.parking_slot_id = ps.id
 		INNER JOIN parking_lots pl ON ps.parking_lot_id = pl.id
@@ -138,7 +139,7 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 	err = tx.QueryRow(query, ticketCode).Scan(
 		&parkingLotModel.Id, &parkingLotModel.Name, &parkingLotModel.Capacity, &parkingLotModel.SlotLeft,
 		&parkingSlotModel.Id, &parkingSlotModel.Number, &parkingSlotModel.Available, &parkingSlotModel.Maintenance,
-		&ticketModel.Id, &ticketModel.Code, &ticketModel.EntryTime, &ticketModel.ExitTime, &ticketModel.Fee,
+		&ticketModel.Id, &ticketModel.Code, &ticketModel.EntryTime, &ticketModel.ExitTime, &ticketModel.Fee, &ticketModel.Hours,
 	)
 	if err != nil {
 		return nil, err
@@ -156,7 +157,7 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 		return nil, err
 	}
 
-	_, err = execAndCheckTx(tx, "UPDATE tickets SET fee = $1, exit_time = $2 where code = $3", ticket.Fee(), ticket.ExitTime(), ticketCode)
+	_, err = execAndCheckTx(tx, "UPDATE tickets SET fee = $1, exit_time = $2, hours = $3 where code = $4", ticket.Fee(), ticket.ExitTime(), ticket.Hours(), ticketCode)
 	if err != nil {
 		return nil, err
 	}
@@ -266,6 +267,23 @@ func (repo *ParkingPostgresqlRepository) ToggleParkingSlotMaintenance(ctx contex
 	return err
 }
 
+func (repo *ParkingPostgresqlRepository) GetParkingSummary(ctx context.Context, startDate, endDate time.Time) (*domain.ParkingSummary, error) {
+	query := `
+		SELECT
+			COALESCE(SUM(t.fee), 0) AS fee,
+			COALESCE(SUM(t.hours), 0) AS parkingHours,
+			COUNT(t.id) AS ticketsIssued
+		FROM
+			tickets t
+		WHERE
+			t.entry_time BETWEEN $1 AND $2 AND t.exit_time is not null;
+	`
+	var summary domain.ParkingSummary
+	fmt.Println(startDate, endDate)
+	err := repo.db.GetContext(ctx, &summary, query, startDate, endDate)
+	return &summary, err
+}
+
 func unmarshallParkingLot(
 	parkingLotModel *ParkingLotModel,
 	slotModel []*ParkingSlotModel,
@@ -304,6 +322,7 @@ func unmarshallTicket(ticketModel *TicketModel, ticket *domain.Ticket) {
 		ticketModel.EntryTime,
 		ticketModel.ExitTime,
 		ticketModel.Fee,
+		ticketModel.Hours,
 	)
 }
 

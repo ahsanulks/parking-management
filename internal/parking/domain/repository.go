@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 )
 
 type Repository interface {
@@ -20,4 +21,5 @@ type Repository interface {
 	CreateParkingLot(ctx context.Context, lot *ParkingLot) error
 	GetParkingLotStatus(ctx context.Context, lotId int) (*ParkingLotStatus, error)
 	ToggleParkingSlotMaintenance(ctx context.Context, managerId, slotId int) error
+	GetParkingSummary(ctx context.Context, startDate, endDate time.Time) (*ParkingSummary, error)
 }

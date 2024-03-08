@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"supertaltest/internal/parking/domain"
 	"supertaltest/internal/parking/usecase"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +16,7 @@ type ParkingManagerUsecase interface {
 	CreateParkingLot(ctx context.Context, parkingManager *domain.ParkingManager, request *usecase.RequestCreateParkingLot) (id int, err error)
 	GetLotStatus(ctx context.Context, lotId int) (*domain.ParkingLotStatus, error)
 	ToggleParkingSlotToMaintenance(ctx context.Context, parkingManager *domain.ParkingManager, slotId int) error
+	GetParkingSummary(ctx context.Context, startDate, endDate time.Time) (*domain.ParkingSummary, error)
 }
 
 type ApiParkingManagerHandler struct {
@@ -77,4 +80,44 @@ func (handler *ApiParkingManagerHandler) ToggleParkingSlotMaintenance(ctx *gin.C
 		return
 	}
 	ctx.JSON(http.StatusOK, "ok")
+}
+
+func (handler *ApiParkingManagerHandler) ParkingSummary(ctx *gin.Context) {
+	startDateStr := ctx.Query("startDate")
+	endDateStr := ctx.Query("endDate")
+
+	var startDate, endDate time.Time
+	var err error
+
+	if startDateStr != "" {
+		startDate, err = time.Parse("2006-01-02", startDateStr)
+		fmt.Println("111", startDate)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid start date format"})
+			return
+		}
+	}
+
+	if endDateStr != "" {
+		endDate, err = time.Parse("2006-01-02", endDateStr)
+		fmt.Println("1112222", endDate)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid end date format"})
+			return
+		}
+	}
+	fmt.Println(startDate, endDate)
+
+	if startDate.IsZero() {
+		startDate = time.Now().AddDate(0, 0, -7)
+	}
+	if endDate.IsZero() {
+		endDate = time.Now()
+	}
+	summary, err := handler.usecase.GetParkingSummary(ctx.Request.Context(), startDate, endDate)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, summary)
 }
