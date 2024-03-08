@@ -3,6 +3,8 @@ package postgresql
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 	"supertaltest/internal/parking/domain"
 	"time"
 
@@ -20,10 +22,11 @@ func NewParkingPostgresqlRepository(db *sqlx.DB) *ParkingPostgresqlRepository {
 }
 
 type ParkingLotModel struct {
-	Id       int    `db:"id"`
-	Name     string `db:"name"`
-	Capacity int    `db:"capacity"`
-	SlotLeft int    `db:"slot_left"`
+	Id        int    `db:"id"`
+	Name      string `db:"name"`
+	Capacity  int    `db:"capacity"`
+	SlotLeft  int    `db:"slot_left"`
+	ManagerId int    `db:"manager_id"`
 }
 
 type ParkingSlotModel struct {
@@ -171,17 +174,46 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 	return ticket, nil
 }
 
+func (repo ParkingPostgresqlRepository) CreateParkingLot(ctx context.Context, lot *domain.ParkingLot) (err error) {
+	tx := repo.db.MustBeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelDefault,
+		ReadOnly:  false,
+	})
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	var lotId int
+	err = tx.QueryRow("INSERT INTO parking_lots (name, capacity, slot_left, manager_id) VALUES($1, $2, $3, $4) returning id", lot.Name(), lot.Capacity(), lot.SlotLeft(), lot.ManagerId()).Scan(&lotId)
+	if err != nil {
+		return err
+	}
+
+	var params []any
+	var query []string
+	for _, parkingSlot := range lot.Slots() {
+		query = append(query, fmt.Sprintf("($%d, $%d, $%d, $%d)", len(params)+1, len(params)+2, len(params)+3, len(params)+4))
+		params = append(params, lotId, parkingSlot.Number(), parkingSlot.Available(), parkingSlot.InMaintenance())
+	}
+
+	stmt := "INSERT INTO parking_slots (parking_lot_id, number, available, in_maintenance) VALUES" + strings.Join(query, ", ")
+	_, err = execAndCheckTx(tx, stmt, params...)
+	if err != nil {
+		return err
+	}
+
+	lot.UnmarshallFromDatabase(int(lotId), lot.SlotLeft(), lot.Capacity(), lot.ManagerId(), lot.Name(), lot.Slots())
+	return
+}
+
 func unmarshallParkingLot(
 	parkingLotModel *ParkingLotModel,
 	slotModel []*ParkingSlotModel,
 ) *domain.ParkingLot {
-	parkingLot := new(domain.ParkingLot)
-	parkingLot.UnmarshallFromDatabase(
-		parkingLotModel.Id,
-		parkingLotModel.SlotLeft,
-		parkingLotModel.Name,
-	)
-
 	availableSlots := make([]*domain.ParkingSlot, len(slotModel))
 	for i, slot := range slotModel {
 		parkingSlot := new(domain.ParkingSlot)
@@ -193,7 +225,17 @@ func unmarshallParkingLot(
 		)
 		availableSlots[i] = parkingSlot
 	}
-	parkingLot.Slot(availableSlots)
+
+	parkingLot := new(domain.ParkingLot)
+	parkingLot.UnmarshallFromDatabase(
+		parkingLotModel.Id,
+		parkingLotModel.SlotLeft,
+		parkingLotModel.Capacity,
+		parkingLotModel.ManagerId,
+		parkingLotModel.Name,
+		availableSlots,
+	)
+
 	return parkingLot
 }
 

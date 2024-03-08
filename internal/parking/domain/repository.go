@@ -16,4 +16,6 @@ type Repository interface {
 		ticketCode string,
 		updateFunc func(ticket *Ticket, lot *ParkingLot) (*Ticket, error),
 	) (*Ticket, error)
+
+	CreateParkingLot(ctx context.Context, lot *ParkingLot) error
 }

@@ -7,14 +7,19 @@ import (
 )
 
 type ApiHandler struct {
-	ParkingHandler api.ApiParkingHandler
+	ParkingHandler        *api.ApiParkingHandler
+	ParkingManagerHandler *api.ApiParkingManagerHandler
 }
 
 func NewApiHandler() *ApiHandler {
 	db := postgresql.MustNewConnection()
 	parkingRepo := postgresql.NewParkingPostgresqlRepository(db)
+
 	guestParkingUsecase := usecase.NewGuestParkerUsecase(parkingRepo)
+	parkingManagerUsecase := usecase.NewParkingManagerUsecase(parkingRepo)
+
 	return &ApiHandler{
-		ParkingHandler: *api.NewApiParkingHandler(guestParkingUsecase),
+		ParkingHandler:        api.NewApiParkingHandler(guestParkingUsecase),
+		ParkingManagerHandler: api.NewApiParkingManagerHandler(parkingManagerUsecase),
 	}
 }
