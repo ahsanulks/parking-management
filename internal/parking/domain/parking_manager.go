@@ -10,6 +10,10 @@ func NewParkingManager(id int) *ParkingManager {
 	}
 }
 
+func (pm *ParkingManager) Id() int {
+	return pm.id
+}
+
 func (pm *ParkingManager) CreateParkingLot(lotName string, numSlots int) *ParkingLot {
 	parkingLot := &ParkingLot{
 		managerId: pm.id,

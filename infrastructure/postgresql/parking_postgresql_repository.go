@@ -249,6 +249,19 @@ func (repo *ParkingPostgresqlRepository) GetParkingLotStatus(ctx context.Context
 	return &parkingLotStatus, nil
 }
 
+func (repo *ParkingPostgresqlRepository) ToggleParkingSlotMaintenance(ctx context.Context, managerId, slotId int) error {
+	query := `
+		UPDATE parking_slots ps
+			SET in_maintenance = NOT ps.in_maintenance
+		FROM parking_lots pl
+		WHERE pl.manager_id = $1
+			AND ps.id = $2
+			AND ps.parking_lot_id = pl.id;
+	`
+	_, err := repo.db.ExecContext(ctx, query, managerId, slotId)
+	return err
+}
+
 func unmarshallParkingLot(
 	parkingLotModel *ParkingLotModel,
 	slotModel []*ParkingSlotModel,

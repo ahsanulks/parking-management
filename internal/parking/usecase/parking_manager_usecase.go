@@ -30,3 +30,7 @@ func (pu *ParkingManagerUsecase) CreateParkingLot(ctx context.Context, parkingMa
 func (pu *ParkingManagerUsecase) GetLotStatus(ctx context.Context, lotId int) (*domain.ParkingLotStatus, error) {
 	return pu.parkingRepo.GetParkingLotStatus(ctx, lotId)
 }
+
+func (pu *ParkingManagerUsecase) ToggleParkingSlotToMaintenance(ctx context.Context, parkingManager *domain.ParkingManager, slotId int) error {
+	return pu.parkingRepo.ToggleParkingSlotMaintenance(ctx, parkingManager.Id(), slotId)
+}

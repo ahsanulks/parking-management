@@ -15,17 +15,3 @@ type ParkingSlotStatus struct {
 	TicketCode *string
 	EntryTime  *time.Time
 }
-
-// func (parkingLotStatus *ParkingLotStatus) UnmarshallFromDatabase(
-// 	id int,
-// 	name string,
-// 	slotLeft int,
-// 	capcity int,
-// 	slotsStatus []*ParkingSlotStatus,
-// ) {
-// 	parkingLotStatus.id = id
-// 	parkingLotStatus.name = name
-// 	parkingLotStatus.capcity = capcity
-// 	parkingLotStatus.slotLeft = slotLeft
-// 	parkingLotStatus.slotsStatus = slotsStatus
-// }
