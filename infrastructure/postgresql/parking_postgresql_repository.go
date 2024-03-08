@@ -174,7 +174,7 @@ func (repo *ParkingPostgresqlRepository) ExitParking(
 	return ticket, nil
 }
 
-func (repo ParkingPostgresqlRepository) CreateParkingLot(ctx context.Context, lot *domain.ParkingLot) (err error) {
+func (repo *ParkingPostgresqlRepository) CreateParkingLot(ctx context.Context, lot *domain.ParkingLot) (err error) {
 	tx := repo.db.MustBeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelDefault,
 		ReadOnly:  false,
@@ -208,6 +208,45 @@ func (repo ParkingPostgresqlRepository) CreateParkingLot(ctx context.Context, lo
 
 	lot.UnmarshallFromDatabase(int(lotId), lot.SlotLeft(), lot.Capacity(), lot.ManagerId(), lot.Name(), lot.Slots())
 	return
+}
+
+func (repo *ParkingPostgresqlRepository) GetParkingLotStatus(ctx context.Context, lotId int) (*domain.ParkingLotStatus, error) {
+	query := `
+		SELECT
+			pl.id AS parking_lot_id,
+			pl.name AS parking_lot_name,
+			pl.slot_left as parking_lot_slot_left,
+			pl.capacity as parking_lot_capacity,
+			ps.number AS parking_slot_number,
+			t.code AS ticket_code,
+			t.entry_time AS ticket_entry_time
+		FROM
+			parking_lots pl
+		JOIN
+			parking_slots ps ON pl.id = ps.parking_lot_id
+		LEFT JOIN
+			tickets t ON ps.id = t.parking_slot_id AND
+			t.exit_time is null
+		WHERE
+			pl.id = $1;
+	`
+	rows, err := repo.db.QueryContext(ctx, query, lotId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var parkingLotStatus domain.ParkingLotStatus
+	var parkingSlotsStatus []*domain.ParkingSlotStatus
+	for rows.Next() {
+		var parkingSlotStatus domain.ParkingSlotStatus
+		rows.Scan(&parkingLotStatus.Id, &parkingLotStatus.Name, &parkingLotStatus.SlotLeft, &parkingLotStatus.Capcity, &parkingSlotStatus.Number, &parkingSlotStatus.TicketCode, &parkingSlotStatus.EntryTime)
+
+		parkingSlotsStatus = append(parkingSlotsStatus, &parkingSlotStatus)
+	}
+	parkingLotStatus.SlotsStatus = parkingSlotsStatus
+
+	return &parkingLotStatus, nil
 }
 
 func unmarshallParkingLot(

@@ -37,7 +37,7 @@ func (parker *GuestParkingUsecase) ExitUserPark(ctx context.Context, ticketCode 
 			if err != nil {
 				return nil, err
 			}
-			lot.MakeSlotAvailable()
+			err = lot.MakeSlotAvailable()
 			return ticket, err
 		})
 }

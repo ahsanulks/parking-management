@@ -25,8 +25,7 @@ func NewApiParkingHandler(parkingUsecase ParkingUsecase) *ApiParkingHandler {
 }
 
 func (handler *ApiParkingHandler) ParkUserVehicle(ctx *gin.Context) {
-	stringId := ctx.Param("id")
-	id, err := strconv.Atoi(stringId)
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, "invalid lots id")
 		return

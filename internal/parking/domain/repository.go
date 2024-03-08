@@ -18,4 +18,5 @@ type Repository interface {
 	) (*Ticket, error)
 
 	CreateParkingLot(ctx context.Context, lot *ParkingLot) error
+	GetParkingLotStatus(ctx context.Context, lotId int) (*ParkingLotStatus, error)
 }

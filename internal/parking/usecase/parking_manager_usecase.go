@@ -26,3 +26,7 @@ func (pu *ParkingManagerUsecase) CreateParkingLot(ctx context.Context, parkingMa
 	err = pu.parkingRepo.CreateParkingLot(ctx, parkingLot)
 	return parkingLot.Id(), err
 }
+
+func (pu *ParkingManagerUsecase) GetLotStatus(ctx context.Context, lotId int) (*domain.ParkingLotStatus, error) {
+	return pu.parkingRepo.GetParkingLotStatus(ctx, lotId)
+}

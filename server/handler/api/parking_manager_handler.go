@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"supertaltest/internal/parking/domain"
 	"supertaltest/internal/parking/usecase"
 
@@ -11,6 +12,7 @@ import (
 
 type ParkingManagerUsecase interface {
 	CreateParkingLot(ctx context.Context, parkingManager *domain.ParkingManager, request *usecase.RequestCreateParkingLot) (id int, err error)
+	GetLotStatus(ctx context.Context, lotId int) (*domain.ParkingLotStatus, error)
 }
 
 type ApiParkingManagerHandler struct {
@@ -45,4 +47,18 @@ func (handler *ApiParkingManagerHandler) CreateParkingLot(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, map[string]int{
 		"parkingLotId": lotId,
 	})
+}
+
+func (handler *ApiParkingManagerHandler) GetParkingSlotStatus(ctx *gin.Context) {
+	lotId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "invalid lots id")
+		return
+	}
+	parkingLotStatus, err := handler.usecase.GetLotStatus(ctx, lotId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, parkingLotStatus)
 }
