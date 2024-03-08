@@ -246,6 +246,10 @@ func (repo *ParkingPostgresqlRepository) GetParkingLotStatus(ctx context.Context
 	}
 	parkingLotStatus.SlotsStatus = parkingSlotsStatus
 
+	if parkingLotStatus.Id == 0 {
+		return nil, sql.ErrNoRows
+	}
+
 	return &parkingLotStatus, nil
 }
 
