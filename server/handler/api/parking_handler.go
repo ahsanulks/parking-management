@@ -49,7 +49,9 @@ func (handler *ApiParkingHandler) ParkUserVehicle(ctx *gin.Context) {
 	}
 	ticketCode, err := handler.parkingUsecase.ParkUserVehicle(ctx.Request.Context(), id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctx.JSON(http.StatusCreated, ParkingVehicleResponse{
@@ -78,7 +80,9 @@ type ExitVehicleResponse struct {
 func (handler *ApiParkingHandler) ExitUserVehicle(ctx *gin.Context) {
 	ticket, err := handler.parkingUsecase.ExitUserPark(ctx.Request.Context(), ctx.Param("code"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, ExitVehicleResponse{

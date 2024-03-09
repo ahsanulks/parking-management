@@ -109,13 +109,17 @@ type SuccessResponse struct {
 func (handler *ApiParkingManagerHandler) ToggleParkingSlotMaintenance(ctx *gin.Context) {
 	slotId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "invalid lots id")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid lots id",
+		})
 		return
 	}
 
 	err = handler.usecase.ToggleParkingSlotToMaintenance(ctx, domain.NewParkingManager(1), slotId)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, SuccessResponse{
