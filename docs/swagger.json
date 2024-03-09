@@ -1,0 +1,307 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/managers/parking-lots/": {
+            "post": {
+                "description": "parking manager create parking lot",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking-manager"
+                ],
+                "summary": "create parking lot",
+                "parameters": [
+                    {
+                        "description": "JsonRequestCreateParkingLot",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.JsonRequestCreateParkingLot"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ParkingVehicleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/managers/parking-lots/{id}": {
+            "get": {
+                "description": "parking manager get parking lot status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking-manager"
+                ],
+                "summary": "get parking lot status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "1",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ParkingLotStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/managers/parking-slots/{id}/maintenance": {
+            "put": {
+                "description": "parking manager toggle parking slot maintenance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking-manager"
+                ],
+                "summary": "get parking lot status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "1",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/managers/parking-summaries": {
+            "get": {
+                "description": "Get summary of parking activities within a specified time range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking-manager"
+                ],
+                "summary": "Get parking summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Parking summary",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ParkingSummary"
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-lots/{id}/park": {
+            "post": {
+                "description": "parking user vehicle to obtain ticket code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "park user vehicle",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "1",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ParkingVehicleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tickets/{code}/exit": {
+            "post": {
+                "description": "unpark user vehicle to obtain fee",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "unpark user vehicle",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "00001-00001-1709942742",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExitVehicleResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.ExitVehicleResponse": {
+            "type": "object",
+            "properties": {
+                "entryTime": {
+                    "type": "string"
+                },
+                "exitTime": {
+                    "type": "string"
+                },
+                "parkingSlotId": {
+                    "type": "integer"
+                },
+                "ticketCode": {
+                    "type": "string"
+                },
+                "totalFee": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.JsonRequestCreateParkingLot": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "numSlot": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.ParkingVehicleResponse": {
+            "type": "object",
+            "properties": {
+                "ticketCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ParkingLotStatus": {
+            "type": "object",
+            "properties": {
+                "capcity": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slotLeft": {
+                    "type": "integer"
+                },
+                "slotsStatus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.ParkingSlotStatus"
+                    }
+                }
+            }
+        },
+        "domain.ParkingSlotStatus": {
+            "type": "object",
+            "properties": {
+                "entryTime": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "ticketCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ParkingSummary": {
+            "type": "object",
+            "properties": {
+                "fee": {
+                    "type": "integer"
+                },
+                "parkingHours": {
+                    "type": "integer"
+                },
+                "ticketsIssued": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,198 @@
+definitions:
+  api.ExitVehicleResponse:
+    properties:
+      entryTime:
+        type: string
+      exitTime:
+        type: string
+      parkingSlotId:
+        type: integer
+      ticketCode:
+        type: string
+      totalFee:
+        type: integer
+    type: object
+  api.JsonRequestCreateParkingLot:
+    properties:
+      name:
+        type: string
+      numSlot:
+        type: integer
+    type: object
+  api.ParkingVehicleResponse:
+    properties:
+      ticketCode:
+        type: string
+    type: object
+  api.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  domain.ParkingLotStatus:
+    properties:
+      capcity:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      slotLeft:
+        type: integer
+      slotsStatus:
+        items:
+          $ref: '#/definitions/domain.ParkingSlotStatus'
+        type: array
+    type: object
+  domain.ParkingSlotStatus:
+    properties:
+      entryTime:
+        type: string
+      number:
+        type: integer
+      ticketCode:
+        type: string
+    type: object
+  domain.ParkingSummary:
+    properties:
+      fee:
+        type: integer
+      parkingHours:
+        type: integer
+      ticketsIssued:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /managers/parking-lots/:
+    post:
+      consumes:
+      - application/json
+      description: parking manager create parking lot
+      parameters:
+      - description: JsonRequestCreateParkingLot
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.JsonRequestCreateParkingLot'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ParkingVehicleResponse'
+      summary: create parking lot
+      tags:
+      - parking-manager
+  /managers/parking-lots/{id}:
+    get:
+      consumes:
+      - application/json
+      description: parking manager get parking lot status
+      parameters:
+      - description: "1"
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ParkingLotStatus'
+      summary: get parking lot status
+      tags:
+      - parking-manager
+  /managers/parking-slots/{id}/maintenance:
+    put:
+      consumes:
+      - application/json
+      description: parking manager toggle parking slot maintenance
+      parameters:
+      - description: "1"
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+      summary: get parking lot status
+      tags:
+      - parking-manager
+  /managers/parking-summaries:
+    get:
+      consumes:
+      - application/json
+      description: Get summary of parking activities within a specified time range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Parking summary
+          schema:
+            $ref: '#/definitions/domain.ParkingSummary'
+      summary: Get parking summary
+      tags:
+      - parking-manager
+  /parking-lots/{id}/park:
+    post:
+      consumes:
+      - application/json
+      description: parking user vehicle to obtain ticket code
+      parameters:
+      - description: "1"
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ParkingVehicleResponse'
+      summary: park user vehicle
+      tags:
+      - user
+  /tickets/{code}/exit:
+    post:
+      consumes:
+      - application/json
+      description: unpark user vehicle to obtain fee
+      parameters:
+      - description: 00001-00001-1709942742
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExitVehicleResponse'
+      summary: unpark user vehicle
+      tags:
+      - user
+swagger: "2.0"

@@ -1,9 +1,12 @@
 package router
 
 import (
+	"supertaltest/docs"
 	"supertaltest/server"
 
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func NewRoute(router *gin.Engine, handler *server.ApiHandler) {
@@ -13,6 +16,7 @@ func NewRoute(router *gin.Engine, handler *server.ApiHandler) {
 		})
 	})
 
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := router.Group("/api/v1")
 	{
 		v1.POST("/managers/parking-lots", handler.ParkingManagerHandler.CreateParkingLot)
@@ -22,4 +26,6 @@ func NewRoute(router *gin.Engine, handler *server.ApiHandler) {
 		v1.POST("/parking-lots/:id/park", handler.ParkingHandler.ParkUserVehicle)
 		v1.POST("/tickets/:code/exit", handler.ParkingHandler.ExitUserVehicle)
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
