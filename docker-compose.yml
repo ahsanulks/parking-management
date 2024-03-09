@@ -1,15 +1,15 @@
 services:
-  # app:
-  #   build: .
-  #   ports:
-  #     - "8080:8080"
-  #   env_file:
-  #     - .env
-  #   extra_hosts:
-  #     - "localhost:host-gateway"
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    extra_hosts:
+      - "localhost:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     platform: linux/x86_64
     image: postgres:14.1-alpine
